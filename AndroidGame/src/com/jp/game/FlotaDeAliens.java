@@ -7,12 +7,10 @@ public class FlotaDeAliens implements Dibujable {
 	
 	private int posicionX;
 	private int posicionY;
-	private static final int ALTO = 190;
-	private static final int ANCHO = 120;
 	private int primeraColumna;
 	private int ultimaColumna;
 	private int ultimaFila;
-	private ObjetoMovible[][] aliens;
+	private Alien[][] aliens;
 	private int sentido;
 	private int maxPosicionX;
 	private int minPosicionX;
@@ -23,7 +21,7 @@ public class FlotaDeAliens implements Dibujable {
 	public static FlotaDeAliens create(int filas, int columnas, int minPosicionX, int maxPosicionX,
 			int minPosicionY, int maxPosicionY) {
 		FlotaDeAliens instance = new FlotaDeAliens();
-		instance.aliens = new ObjetoMovible[filas][columnas];
+		instance.aliens = new Alien[filas][columnas];
 		instance.crearAliens();
 		instance.posicionX = 0;
 		instance.posicionY = 0;
@@ -39,28 +37,30 @@ public class FlotaDeAliens implements Dibujable {
 	}
 	
 	private void crearAliens() {
+		int ancho = (int) (Assets.alien.getWidth() * 1.1);
+		int alto = (int) (Assets.alien.getHeight() * 1.1);
 		for (int fila = 0; fila < aliens.length; fila++) {
 			for (int columna = 0; columna < aliens[fila].length; columna++){
-				aliens[fila][columna] = ObjetoMovible.create(Assets.alien, columna * ANCHO, fila * ALTO);
+				aliens[fila][columna] = Alien.create(columna * ancho, fila * alto);
 			}
 		}
 	}
 
 	@Override
 	public void dibujar(Graphics canvas) {
-		for (ObjetoMovible[] fila : aliens) {
-			for (ObjetoMovible alien : fila) {
+		for (Alien[] fila : aliens) {
+			for (Alien alien : fila) {
 				alien.dibujar(canvas);
 			}
 		}
 	}
 
 	public int getMaxPosicionX() {
-		return posicionX + ANCHO * ultimaColumna;
+		return posicionX + getAncho() * ultimaColumna;
 	}
-	
+
 	public int getMinPosicionX() {
-		return posicionX + ANCHO * primeraColumna;
+		return posicionX + getAncho() * primeraColumna;
 	}
 
 	public void avanzar(int velocidad) {
@@ -85,18 +85,22 @@ public class FlotaDeAliens implements Dibujable {
 	}
 
 	private void desplazarAliens(int velocidad) {
-		for (ObjetoMovible[] fila : aliens) {
-			for (ObjetoMovible alien : fila) {
+		for (Alien[] fila : aliens) {
+			for (Alien alien : fila) {
 				alien.desplazarX(velocidad);
 			}
 		}
 	}
 
 	private void bajarAliens(int velocidad) {
-		for (ObjetoMovible[] fila : aliens) {
-			for (ObjetoMovible alien : fila) {
+		for (Alien[] fila : aliens) {
+			for (Alien alien : fila) {
 				alien.desplazarY(velocidad);
 			}
 		}
+	}
+	
+	private int getAncho() {
+		return Assets.alien.getWidth();
 	}
 }

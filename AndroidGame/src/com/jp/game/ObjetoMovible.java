@@ -1,41 +1,58 @@
 package com.jp.game;
 
+import android.graphics.Point;
+
 import com.jp.framework.Graphics;
 import com.jp.framework.Image;
 
-public class ObjetoMovible implements Dibujable {
-	private Image imagen;
-	private int posicionX;
-	private int posicionY;
-
-	public static ObjetoMovible create(Image imagen, int posicionX, int posicionY) {
-		ObjetoMovible instance = new ObjetoMovible();
-		instance.imagen = imagen;
-		instance.posicionX = posicionX;
-		instance.posicionY = posicionY;
-		
-		return instance;
-	}
+public abstract class ObjetoMovible implements Dibujable {
+	
+	protected Image imagen;
+	private Point posicion = new Point();
 	
 	public void dibujar(Graphics canvas){
-		canvas.drawImage(imagen, posicionX, posicionY);
+		canvas.drawImage(imagen, posicion.x, posicion.y);
 	}
 	
-	public void setPosicion(int posicionX, int posicionY) {
-		this.posicionX = posicionX;
-		this.posicionY = posicionY;
+	public Point getPosicion() {
+		return posicion;
+	}
+	
+	public void setPosicion(Point posicion) {
+		this.posicion = posicion;
+	}
+	
+	public void setPosicionX(int posicionX) {
+		this.posicion.x = posicionX;
+	}
+	
+	public void setPosicionY(int posicionY) {
+		this.posicion.y = posicionY;
 	}
 
 	public void desplazarX(int velocidad) {
-		this.posicionX += velocidad;
+		this.posicion.x += velocidad;
 		
 	}
 
-	public int getPosicionX() {
-		return this.posicionX;
+	public void desplazarY(int velocidad) {
+		this.posicion.y += velocidad;
 	}
 
-	public void desplazarY(int velocidad) {
-		this.posicionY += velocidad;
+	public int getAlto() {
+		return imagen.getHeight();
 	}
+
+	public int getAncho() {
+		return imagen.getWidth();
+	}
+
+	public Image getImagen() {
+		return imagen;
+	}
+
+	public void setImagen(Image imagen) {
+		this.imagen = imagen;
+	}
+	
 }
