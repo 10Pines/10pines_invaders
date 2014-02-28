@@ -101,11 +101,20 @@ public class MainMenuScreen extends Screen {
 	private void moverObjetos() {
 		flota.avanzar(velocidad);
 		moverProyectiles();
+		verificarImpactos(flota, proyectiles);
+	}
+
+	private void verificarImpactos(FlotaDeAliens flota,
+			List<Proyectil> proyectiles) {
+		flota.recibirProyectiles(proyectiles);
 	}
 
 	private void moverProyectiles() {
 		for (Proyectil proyectil : proyectiles) {
 			proyectil.avanzar();
+			if(proyectil.debeDestruir()){
+				proyectiles.remove(proyectil);
+			}
 		}
 		
 	}

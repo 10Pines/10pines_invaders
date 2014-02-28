@@ -1,5 +1,11 @@
 package com.jp.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import android.graphics.Point;
+import android.graphics.Rect;
+
 import com.jp.framework.Graphics;
 
 
@@ -16,6 +22,7 @@ public class FlotaDeAliens implements Dibujable {
 	private int minPosicionX;
 	private int maxPosicionY;
 	private int minPosicionY;
+	private int primeraFila;
 
 	
 	public static FlotaDeAliens create(int filas, int columnas, int minPosicionX, int maxPosicionX,
@@ -28,6 +35,7 @@ public class FlotaDeAliens implements Dibujable {
 		instance.primeraColumna = 0;
 		instance.ultimaColumna = columnas - 1;
 		instance.ultimaFila = filas - 1;
+		instance.primeraFila = 0;
 		instance.sentido = 1;
 		instance.maxPosicionX = maxPosicionX;
 		instance.minPosicionX = minPosicionX;
@@ -50,7 +58,9 @@ public class FlotaDeAliens implements Dibujable {
 	public void dibujar(Graphics canvas) {
 		for (Alien[] fila : aliens) {
 			for (Alien alien : fila) {
-				alien.dibujar(canvas);
+				if(alien != null) {
+					alien.dibujar(canvas);
+				}
 			}
 		}
 	}
@@ -87,7 +97,9 @@ public class FlotaDeAliens implements Dibujable {
 	private void desplazarAliens(int velocidad) {
 		for (Alien[] fila : aliens) {
 			for (Alien alien : fila) {
-				alien.desplazarX(velocidad);
+				if(alien != null){
+					alien.desplazarX(velocidad);
+				}
 			}
 		}
 	}
@@ -95,7 +107,9 @@ public class FlotaDeAliens implements Dibujable {
 	private void bajarAliens(int velocidad) {
 		for (Alien[] fila : aliens) {
 			for (Alien alien : fila) {
-				alien.desplazarY(velocidad);
+				if(alien != null){
+					alien.desplazarY(velocidad);
+				}
 			}
 		}
 	}
@@ -103,4 +117,43 @@ public class FlotaDeAliens implements Dibujable {
 	private int getAncho() {
 		return Assets.alien.getWidth();
 	}
+	private int getAlto() {
+		return Assets.alien.getHeight();
+	}
+
+	public void recibirProyectiles(List<Proyectil> proyectiles) {
+		List<Proyectil> proyectilesImpactados = new ArrayList<Proyectil>();
+		for (Proyectil proyectil : proyectiles) {
+			impactarEnAlien(proyectil, proyectilesImpactados);
+		}
+		proyectiles.removeAll(proyectilesImpactados);
+	}
+
+	private void impactarEnAlien(Proyectil proyectil, List<Proyectil> proyectilesImpactados) {
+		//Verifico si esta en mi bounding box
+		Point posicionProyectil = proyectil.getPosicion();
+		
+		if(Utils.inBounds(posicionProyectil, getBoundingBox())){
+			Point posicionImpacto = obtenerPosicionDentroDeLaFlota(posicionProyectil);
+			if(aliens[posicionImpacto.x][posicionImpacto.y] != null){
+				aliens[posicionImpacto.x][posicionImpacto.y] = null;
+				proyectilesImpactados.add(proyectil);
+			}
+		}
+	}
+
+
+	private Point obtenerPosicionDentroDeLaFlota(Point posicion) {
+		int ancho = (int) (Assets.alien.getWidth() * 1.1);
+		int alto = (int) (Assets.alien.getHeight() * 1.1);
+		int x = (posicion.x - posicionX) / ancho;
+		int y = (posicion.y - posicionY) / alto;
+		return new Point(x, y);
+	}
+
+	private Rect getBoundingBox() {
+		return new Rect(posicionX + getAncho() * primeraColumna, posicionY + getAlto() * primeraFila, 
+				posicionX + getAncho() * (ultimaColumna+1), posicionY + getAlto() * (ultimaFila+1));
+	}
+
 }

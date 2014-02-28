@@ -17,4 +17,8 @@ public class Proyectil extends ObjetoMovible {
 		this.desplazarY(velocidad);
 	}
 
+	public boolean debeDestruir() {
+		return getPosicion().y <= 0;
+	}
+
 }
