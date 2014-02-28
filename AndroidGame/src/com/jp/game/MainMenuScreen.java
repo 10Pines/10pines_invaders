@@ -14,11 +14,14 @@ import com.jp.framework.Screen;
 
 public class MainMenuScreen extends Screen {
 	
-	private static final int MAX_POSICION_X = 640;
+	private static final int MAX_POSICION_X = 680;
 	private static final int MIN_POSICION_X = 0;
+	private static final int MIN_POSICION_Y = 0;
+	private static final int MAX_POSICION_Y = 1090;
 	private ObjetoMovible nave;
 	private ObjetoMovible alien;
-	private List<ObjetoMovible> dibujables;
+	private List<Dibujable> dibujables;
+	private FlotaDeAliens flota;
 	private int sentido;
 	private int velocidad = 3;
 
@@ -28,10 +31,10 @@ public class MainMenuScreen extends Screen {
 		Assets.nave = canvas.newImage("nave.png", ImageFormat.RGB565);
 		Assets.alien = canvas.newImage("alien.png", ImageFormat.RGB565);
 		
+		flota = FlotaDeAliens.create(3, 4, MIN_POSICION_X, MAX_POSICION_X, MIN_POSICION_Y, MAX_POSICION_Y);
 		nave = ObjetoMovible.create(Assets.nave, 200, 500);
-		alien = ObjetoMovible.create(Assets.alien, 350, 240);
 		
-		dibujables = Arrays.asList(nave, alien);
+		dibujables = Arrays.asList(nave, flota);
 	}
 	
 	public MainMenuScreen(Game game) {
@@ -42,14 +45,8 @@ public class MainMenuScreen extends Screen {
 	public void update(float deltaTime) {
 		Graphics canvas = game.getGraphics();
 		canvas.clearScreen(Color.GRAY);
-		
-		Paint paint = new Paint();
-		paint.setColor(Color.WHITE);
-		paint.setTextSize(32);
-		canvas.drawString("Delta time:" + deltaTime, 0, 32, paint);
-		canvas.drawLine(0, 0, 500, 500, Color.WHITE);
-		
-		moverAlien();
+
+		moverObjetos();
 		dibujarDibujables(canvas);
 		
 		List<TouchEvent> touchEvents = game.getInput().getTouchEvents();
@@ -70,17 +67,13 @@ public class MainMenuScreen extends Screen {
 		
 	}
 
-	private void moverAlien() {
+	private void moverObjetos() {
+		flota.avanzar(velocidad);
 		
-		if((velocidad > 0 && alien.getPosicionX() >= MAX_POSICION_X) || (velocidad < 0 && alien.getPosicionX() <= MIN_POSICION_X)){
-			velocidad = velocidad * -1;
-		}
-		
-		alien.desplazarX(velocidad);
 	}
 
 	private void dibujarDibujables(Graphics canvas) {
-		for (ObjetoMovible dibujable : dibujables) {
+		for (Dibujable dibujable : dibujables) {
 			dibujable.dibujar(canvas);
 		}
 	}

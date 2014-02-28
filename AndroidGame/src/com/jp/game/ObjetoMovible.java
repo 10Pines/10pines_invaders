@@ -3,7 +3,7 @@ package com.jp.game;
 import com.jp.framework.Graphics;
 import com.jp.framework.Image;
 
-public class ObjetoMovible {
+public class ObjetoMovible implements Dibujable {
 	private Image imagen;
 	private int posicionX;
 	private int posicionY;
@@ -33,5 +33,9 @@ public class ObjetoMovible {
 
 	public int getPosicionX() {
 		return this.posicionX;
+	}
+
+	public void desplazarY(int velocidad) {
+		this.posicionY += velocidad;
 	}
 }
