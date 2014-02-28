@@ -7,4 +7,6 @@ public class Assets {
     
     public static Image menu;
     public static Sound click;
+    public static Image nave;
+    public static Image alien;
 }

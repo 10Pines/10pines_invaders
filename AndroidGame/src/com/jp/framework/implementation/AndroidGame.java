@@ -102,6 +102,7 @@ public abstract class AndroidGame extends Activity implements Game {
         if (screen == null)
             throw new IllegalArgumentException("Screen must not be null");
 
+        screen.init();
         this.screen.pause();
         this.screen.dispose();
         screen.resume();

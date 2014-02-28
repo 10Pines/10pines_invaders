@@ -3,7 +3,6 @@ package com.jp.game;
 
 import com.jp.framework.Game;
 import com.jp.framework.Graphics;
-import com.jp.framework.Graphics.ImageFormat;
 import com.jp.framework.Screen;
 
 
@@ -15,11 +14,10 @@ public class LoadingScreen extends Screen {
 
     @Override
     public void update(float deltaTime) {
-        Graphics g = game.getGraphics();
-        Assets.menu = g.newImage("menu.png", ImageFormat.RGB565);
-        Assets.click = game.getAudio().createSound("menutheme.mp3");
-
-
+    	
+        Graphics canvas = game.getGraphics();
+       // Assets.menu = canvas.newImage("menu.png", ImageFormat.RGB565);
+       // Assets.click = game.getAudio().createSound("menutheme.mp3");
         
         game.setScreen(new MainMenuScreen(game));
 
