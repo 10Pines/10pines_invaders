@@ -7,6 +7,7 @@ import java.util.List;
 
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Rect;
 
 import com.jp.framework.Game;
 import com.jp.framework.Graphics;
@@ -41,7 +42,10 @@ public class MainMenuScreen extends Screen {
 		Assets.alien = canvas.newImage("alien.png", ImageFormat.RGB565);
 		Assets.proyectil = canvas.newImage("proyectil.png", ImageFormat.RGB565);
 		
-		flota = FlotaDeAliens.create(5, 8, MIN_POSICION_X, MAX_POSICION_X, MIN_POSICION_Y, MAX_POSICION_Y);
+		int maxPosicionX = canvas.getWidth();
+		int maxPosicionY = canvas.getHeight();
+		Rect areaFlota = new Rect(MIN_POSICION_X, MIN_POSICION_Y, maxPosicionX, maxPosicionY);
+		flota = FlotaDeAliens.create(5, 8, areaFlota);
 		
 		Point puntoInicialNave =  new Point(POSICION_INICIAL_NAVE_X, POSICION_INICIAL_NAVE_Y);
 		Point inicioZonaTouchNave = new Point(0, POSICION_INICIAL_NAVE_Y);

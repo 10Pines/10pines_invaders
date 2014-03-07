@@ -20,15 +20,11 @@ public class FlotaDeAliens implements Dibujable {
 	private int ultimaFila;
 	private Alien[][] aliens;
 	private int sentido;
-	private int maxPosicionX;
-	private int minPosicionX;
-	private int maxPosicionY;
-	private int minPosicionY;
 	private int primeraFila;
+	private Rect areaFlota;
 
 	
-	public static FlotaDeAliens create(int filas, int columnas, int minPosicionX, int maxPosicionX,
-			int minPosicionY, int maxPosicionY) {
+	public static FlotaDeAliens create(int filas, int columnas, Rect areaFlota) {
 		FlotaDeAliens instance = new FlotaDeAliens();
 		instance.aliens = new Alien[columnas][filas];
 		instance.posicion = new Point(0,0);
@@ -37,10 +33,7 @@ public class FlotaDeAliens implements Dibujable {
 		instance.ultimaFila = filas - 1;
 		instance.primeraFila = 0;
 		instance.sentido = 1;
-		instance.maxPosicionX = maxPosicionX;
-		instance.minPosicionX = minPosicionX;
-		instance.maxPosicionY = maxPosicionY;
-		instance.minPosicionY = minPosicionY;
+		instance.areaFlota = areaFlota;
 		instance.crearAliens();
 		return instance;
 	}
@@ -69,11 +62,11 @@ public class FlotaDeAliens implements Dibujable {
 	}
 
 	public int getMaxPosicionX() {
-		return posicion.x + getAnchoAlien() * ultimaColumna;
+		return getBoundingBox().right;
 	}
 
 	public int getMinPosicionX() {
-		return posicion.x + getAnchoAlien() * primeraColumna;
+		return getBoundingBox().left;
 	}
 
 	public void avanzar(int velocidad) {
@@ -87,7 +80,9 @@ public class FlotaDeAliens implements Dibujable {
 	}
 
 	private boolean llegaAlLimite() {
-		return (sentido > 0 && this.getMaxPosicionX() >= maxPosicionX) || (sentido < 0 && this.getMinPosicionX() <= minPosicionX);
+		int maxPosicionX = areaFlota.right;
+		int minPosicionX = areaFlota.left;
+		return (sentido > 0 && this.getMaxPosicionX() >= maxPosicionX ) || (sentido < 0 && this.getMinPosicionX() <= minPosicionX );
 	}
 
 	private void invertirSentido() {
