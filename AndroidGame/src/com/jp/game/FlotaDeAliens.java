@@ -24,7 +24,7 @@ public class FlotaDeAliens implements Dibujable {
 	private Rect areaFlota;
 
 	
-	public static FlotaDeAliens create(int filas, int columnas, Rect areaFlota) {
+	public static FlotaDeAliens create(int columnas, int filas, Rect areaFlota) {
 		FlotaDeAliens instance = new FlotaDeAliens();
 		instance.aliens = new Alien[columnas][filas];
 		instance.posicion = new Point(0,0);
@@ -69,17 +69,29 @@ public class FlotaDeAliens implements Dibujable {
 		return getBoundingBox().left;
 	}
 
-	public void avanzar(int velocidad) {
-		if(llegaAlLimite()){
+	public void avanzar(int velocidad) throws FinDeJuegoException {
+		if(llegaAlLimiteEnX()){
 			invertirSentido();
 			posicion.y += (velocidad * 5);
+			if(llegaAlLimiteEnY()){
+				throw new FinDeJuegoException();
+			}
 		}
 		int delta = velocidad * sentido;
 		posicion.x += delta;
 		
 	}
 
-	private boolean llegaAlLimite() {
+	private boolean llegaAlLimiteEnY() {
+		int maxPosicionY = areaFlota.bottom;
+		return this.getMaxPosicionY() >= maxPosicionY;
+	}
+
+	private int getMaxPosicionY() {
+		return getBoundingBox().bottom;
+	}
+
+	private boolean llegaAlLimiteEnX() {
 		int maxPosicionX = areaFlota.right;
 		int minPosicionX = areaFlota.left;
 		return (sentido > 0 && this.getMaxPosicionX() >= maxPosicionX ) || (sentido < 0 && this.getMinPosicionX() <= minPosicionX );
@@ -96,57 +108,55 @@ public class FlotaDeAliens implements Dibujable {
 		return Assets.alien.getHeight();
 	}
 
-	public void recibirProyectiles(List<Proyectil> proyectiles) {
-		List<Proyectil> proyectilesImpactados = new ArrayList<Proyectil>();
-		for (Proyectil proyectil : proyectiles) {
-			impactarEnAlien(proyectil, proyectilesImpactados);
+	public void verificarColisionesConProyectiles(List<Proyectil> proyectiles) {
+		List<Impacto<Proyectil>> impactos = detectarImpactosCon(proyectiles);
+		for (Impacto<Proyectil> impacto : impactos) {
+			Alien alienImpactado = impacto.getAlien();
+			alienImpactado.morir();
+			proyectiles.remove(impacto.getObjetoMovible());
 		}
-		proyectiles.removeAll(proyectilesImpactados);
+		ajustarBoundingBox();
 	}
 
-	private void impactarEnAlien(Proyectil proyectil, List<Proyectil> proyectilesImpactados) {
-		//Verifico si esta en mi bounding box
-		Point posicionProyectil = proyectil.getPosicion();
+	private <T extends ObjetoMovible> List<Impacto<T>> detectarImpactosCon(List<T> objetosMovibles) {
+		List<Impacto<T>> impactos = new ArrayList<Impacto<T>>();
 		
-		if(Utils.inBounds(posicionProyectil, getBoundingBox())){
-			Point posicionImpacto = obtenerPosicionDentroDeLaFlota(posicionProyectil);
-			int columna = posicionImpacto.x;
-			int fila = posicionImpacto.y;
-			if(aliens[columna][fila].estaVivo()){
-				aliens[columna][fila].morir();
-				ajustarBoundingBox(columna, fila);
-				proyectilesImpactados.add(proyectil);
-			}
-		}
-	}
-
-
-	private void ajustarBoundingBox(int columna, int fila) throws FinDeJuegoException {
-		if(columna==primeraColumna){
-			primeraColumna = calcularPrimeraColumna();
-			if(primeraColumna==TODOS_MUERTOS){
-				throw new FinDeJuegoException();
-			}
-		}
-		if(columna==ultimaColumna){
-			ultimaColumna = calcularUltimaColumna();
-			if(ultimaColumna==TODOS_MUERTOS){
-				throw new FinDeJuegoException();
-			}
-		}
-		if(fila==primeraFila){
-			primeraFila = calcularPrimeraFila();
-			if(primeraFila==TODOS_MUERTOS){
-				throw new FinDeJuegoException();
-			}
-		}
-		if(fila==ultimaFila){
-			ultimaFila = calcularUltimaFila();
-			if(ultimaFila==TODOS_MUERTOS){
-				throw new FinDeJuegoException();
+		for (T objetoMovible : objetosMovibles) {
+			//Verifico si esta en mi bounding box
+			Point posicionObjetoMovible = objetoMovible.getPosicion();
+			
+			if(Utils.inBounds(posicionObjetoMovible, getBoundingBox())){
+				Point posicionImpacto = obtenerPosicionDentroDeLaFlota(posicionObjetoMovible);
+				int columna = posicionImpacto.x;
+				int fila = posicionImpacto.y;
+				if(aliens[columna][fila].estaVivo()){
+					Impacto<T> impacto = Impacto.create(aliens[columna][fila], objetoMovible);
+					impactos.add(impacto);
+				}
 			}
 		}
 		
+		return impactos;
+		
+	}
+
+	private void ajustarBoundingBox() throws FinDeJuegoException {
+		primeraColumna = calcularPrimeraColumna();
+		if(primeraColumna==TODOS_MUERTOS){
+			throw new FinDeJuegoException();
+		}
+		ultimaColumna = calcularUltimaColumna();
+		if(ultimaColumna==TODOS_MUERTOS){
+			throw new FinDeJuegoException();
+		}
+		primeraFila = calcularPrimeraFila();
+		if(primeraFila==TODOS_MUERTOS){
+			throw new FinDeJuegoException();
+		}
+		ultimaFila = calcularUltimaFila();
+		if(ultimaFila==TODOS_MUERTOS){
+			throw new FinDeJuegoException();
+		}
 	}
 
 	private int calcularPrimeraColumna() {
@@ -208,6 +218,17 @@ public class FlotaDeAliens implements Dibujable {
 	private Rect getBoundingBox() {
 		return new Rect(posicion.x + getAnchoAlien() * primeraColumna, posicion.y + getAltoAlien() * primeraFila, 
 				posicion.x + getAnchoAlien() * (ultimaColumna+1), posicion.y + getAltoAlien() * (ultimaFila+1));
+	}
+
+	public void verificarColisionConNave(Nave nave) throws FinDeJuegoException {
+		if(impactaConNave(nave)){
+			throw new FinDeJuegoException();
+		}
+		
+	}
+
+	private boolean impactaConNave(Nave nave) {
+		return getBoundingBox().intersect(nave.getBoundingBox());
 	}
 
 }

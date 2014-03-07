@@ -18,21 +18,18 @@ import com.jp.game.exceptions.FinDeJuegoException;
 
 public class MainMenuScreen extends Screen {
 	
-	private static final int MAX_POSICION_X = 680;
 	private static final int MIN_POSICION_X = 0;
 	private static final int MIN_POSICION_Y = 0;
-	private static final int MAX_POSICION_Y = 1090;
 	private static final int PANTALLA_ALTO = 1280;
 	private static final int PANTALLA_ANCHO = 800;
-	private static final int CANTIDAD_FILAS_ALIENS = 4;
+	private static final int CANTIDAD_FILAS_ALIENS = 5;
 	private static final int CANTIDAD_COLUMNAS_ALIENS = 8;
 	private static final int POSICION_INICIAL_NAVE_X = 300;
 	private static final int POSICION_INICIAL_NAVE_Y = 1100;
 	private Nave nave;
 	private List<Dibujable> dibujables;
 	private FlotaDeAliens flota;
-	private int sentido;
-	private int velocidad = 3;
+	private int velocidad = 10;
 	private List<Proyectil> proyectiles = new ArrayList<Proyectil>();
 
 	@Override
@@ -45,7 +42,7 @@ public class MainMenuScreen extends Screen {
 		int maxPosicionX = canvas.getWidth();
 		int maxPosicionY = canvas.getHeight();
 		Rect areaFlota = new Rect(MIN_POSICION_X, MIN_POSICION_Y, maxPosicionX, maxPosicionY);
-		flota = FlotaDeAliens.create(5, 8, areaFlota);
+		flota = FlotaDeAliens.create(CANTIDAD_COLUMNAS_ALIENS, CANTIDAD_FILAS_ALIENS, areaFlota);
 		
 		Point puntoInicialNave =  new Point(POSICION_INICIAL_NAVE_X, POSICION_INICIAL_NAVE_Y);
 		Point inicioZonaTouchNave = new Point(0, POSICION_INICIAL_NAVE_Y);
@@ -106,7 +103,8 @@ public class MainMenuScreen extends Screen {
 
 	private void verificarImpactos(FlotaDeAliens flota,
 			List<Proyectil> proyectiles) {
-		flota.recibirProyectiles(proyectiles);
+		flota.verificarColisionesConProyectiles(proyectiles);
+		flota.verificarColisionConNave(nave);
 	}
 
 	private void moverProyectiles() {
