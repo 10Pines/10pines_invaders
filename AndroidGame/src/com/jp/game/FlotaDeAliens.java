@@ -3,16 +3,18 @@ package com.jp.game;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 
 import com.jp.framework.Graphics;
+import com.jp.game.exceptions.FinDeJuegoException;
 
 
 public class FlotaDeAliens implements Dibujable {
 	
-	private int posicionX;
-	private int posicionY;
+	private static final int TODOS_MUERTOS = -1;
+	private Point posicion;
 	private int primeraColumna;
 	private int ultimaColumna;
 	private int ultimaFila;
@@ -28,10 +30,8 @@ public class FlotaDeAliens implements Dibujable {
 	public static FlotaDeAliens create(int filas, int columnas, int minPosicionX, int maxPosicionX,
 			int minPosicionY, int maxPosicionY) {
 		FlotaDeAliens instance = new FlotaDeAliens();
-		instance.aliens = new Alien[filas][columnas];
-		instance.crearAliens();
-		instance.posicionX = 0;
-		instance.posicionY = 0;
+		instance.aliens = new Alien[columnas][filas];
+		instance.posicion = new Point(0,0);
 		instance.primeraColumna = 0;
 		instance.ultimaColumna = columnas - 1;
 		instance.ultimaFila = filas - 1;
@@ -41,48 +41,48 @@ public class FlotaDeAliens implements Dibujable {
 		instance.minPosicionX = minPosicionX;
 		instance.maxPosicionY = maxPosicionY;
 		instance.minPosicionY = minPosicionY;
+		instance.crearAliens();
 		return instance;
 	}
 	
 	private void crearAliens() {
-		int ancho = (int) (Assets.alien.getWidth() * 1.1);
-		int alto = (int) (Assets.alien.getHeight() * 1.1);
-		for (int fila = 0; fila < aliens.length; fila++) {
-			for (int columna = 0; columna < aliens[fila].length; columna++){
-				aliens[fila][columna] = Alien.create(columna * ancho, fila * alto);
+		for (int columna = 0; columna < aliens.length; columna++) {
+			for (int fila = 0; fila < aliens[columna].length; fila++){
+				Point posicionDentroDeFlota = new Point(columna, fila);
+				aliens[columna][fila] = Alien.create(posicion, posicionDentroDeFlota);
 			}
 		}
 	}
 
 	@Override
 	public void dibujar(Graphics canvas) {
-		for (Alien[] fila : aliens) {
-			for (Alien alien : fila) {
-				if(alien != null) {
-					alien.dibujar(canvas);
-				}
+		dibujarBoundingBox(canvas);
+		for (Alien[] columna : aliens) {
+			for (Alien alien : columna) {
+				alien.dibujar(canvas);
 			}
 		}
 	}
 
+	private void dibujarBoundingBox(Graphics canvas) {
+		canvas.drawRect(getBoundingBox(), Color.WHITE);
+	}
+
 	public int getMaxPosicionX() {
-		return posicionX + getAncho() * ultimaColumna;
+		return posicion.x + getAnchoAlien() * ultimaColumna;
 	}
 
 	public int getMinPosicionX() {
-		return posicionX + getAncho() * primeraColumna;
+		return posicion.x + getAnchoAlien() * primeraColumna;
 	}
 
 	public void avanzar(int velocidad) {
 		if(llegaAlLimite()){
 			invertirSentido();
-			bajarAliens(velocidad * 5);
-			posicionY += velocidad;
+			posicion.y += (velocidad * 5);
 		}
 		int delta = velocidad * sentido;
-		posicionX += delta;
-		desplazarAliens(delta);
-		
+		posicion.x += delta;
 		
 	}
 
@@ -94,30 +94,10 @@ public class FlotaDeAliens implements Dibujable {
 		sentido = sentido * -1;
 	}
 
-	private void desplazarAliens(int velocidad) {
-		for (Alien[] fila : aliens) {
-			for (Alien alien : fila) {
-				if(alien != null){
-					alien.desplazarX(velocidad);
-				}
-			}
-		}
-	}
-
-	private void bajarAliens(int velocidad) {
-		for (Alien[] fila : aliens) {
-			for (Alien alien : fila) {
-				if(alien != null){
-					alien.desplazarY(velocidad);
-				}
-			}
-		}
-	}
-	
-	private int getAncho() {
+	private int getAnchoAlien() {
 		return Assets.alien.getWidth();
 	}
-	private int getAlto() {
+	private int getAltoAlien() {
 		return Assets.alien.getHeight();
 	}
 
@@ -135,25 +115,104 @@ public class FlotaDeAliens implements Dibujable {
 		
 		if(Utils.inBounds(posicionProyectil, getBoundingBox())){
 			Point posicionImpacto = obtenerPosicionDentroDeLaFlota(posicionProyectil);
-			if(aliens[posicionImpacto.x][posicionImpacto.y] != null){
-				aliens[posicionImpacto.x][posicionImpacto.y] = null;
+			int columna = posicionImpacto.x;
+			int fila = posicionImpacto.y;
+			if(aliens[columna][fila].estaVivo()){
+				aliens[columna][fila].morir();
+				ajustarBoundingBox(columna, fila);
 				proyectilesImpactados.add(proyectil);
 			}
 		}
 	}
 
 
-	private Point obtenerPosicionDentroDeLaFlota(Point posicion) {
-		int ancho = (int) (Assets.alien.getWidth() * 1.1);
-		int alto = (int) (Assets.alien.getHeight() * 1.1);
-		int x = (posicion.x - posicionX) / ancho;
-		int y = (posicion.y - posicionY) / alto;
-		return new Point(x, y);
+	private void ajustarBoundingBox(int columna, int fila) throws FinDeJuegoException {
+		if(columna==primeraColumna){
+			primeraColumna = calcularPrimeraColumna();
+			if(primeraColumna==TODOS_MUERTOS){
+				throw new FinDeJuegoException();
+			}
+		}
+		if(columna==ultimaColumna){
+			ultimaColumna = calcularUltimaColumna();
+			if(ultimaColumna==TODOS_MUERTOS){
+				throw new FinDeJuegoException();
+			}
+		}
+		if(fila==primeraFila){
+			primeraFila = calcularPrimeraFila();
+			if(primeraFila==TODOS_MUERTOS){
+				throw new FinDeJuegoException();
+			}
+		}
+		if(fila==ultimaFila){
+			ultimaFila = calcularUltimaFila();
+			if(ultimaFila==TODOS_MUERTOS){
+				throw new FinDeJuegoException();
+			}
+		}
+		
+	}
+
+	private int calcularPrimeraColumna() {
+		for(int columna = primeraColumna; columna <= ultimaColumna; columna++) {
+			for(int fila = primeraFila; fila <= ultimaFila; fila++){
+				if(aliens[columna][fila].estaVivo()) {
+					return columna;
+				}
+			}
+		}
+		//QUIERE DECIR QUE NO HAY ALIENS VIVOS
+		return TODOS_MUERTOS;
+	}
+	
+	private int calcularUltimaColumna() {
+		for(int columna = ultimaColumna; columna >= primeraColumna; columna--) {
+			for(int fila = primeraFila; fila <= ultimaFila; fila++){
+				if(aliens[columna][fila].estaVivo()) {
+					return columna;
+				}
+			}
+		}
+		//QUIERE DECIR QUE NO HAY ALIENS VIVOS
+		return TODOS_MUERTOS;
+	}
+	
+	private int calcularPrimeraFila() {
+		for(int fila = primeraFila; fila <= ultimaFila; fila++){
+			for(int columna = primeraColumna; columna <= ultimaColumna; columna++) {
+				if(aliens[columna][fila].estaVivo()) {
+					return fila;
+				}
+			}
+		}
+		//QUIERE DECIR QUE NO HAY ALIENS VIVOS
+		return TODOS_MUERTOS;
+	}
+	
+	private int calcularUltimaFila() {
+		for(int fila = ultimaFila; fila >= primeraFila; fila--){
+			for(int columna = primeraColumna; columna <= ultimaColumna; columna++) {
+				if(aliens[columna][fila].estaVivo()) {
+					return fila;
+				}
+			}
+		}
+		//QUIERE DECIR QUE NO HAY ALIENS VIVOS
+		return TODOS_MUERTOS;
+	}
+
+	private Point obtenerPosicionDentroDeLaFlota(Point posicionAbsoluta) {
+		int ancho = getAnchoAlien();
+		int alto = getAltoAlien();
+		int columna = (posicionAbsoluta.x - posicion.x) / ancho;
+		int fila = (posicionAbsoluta.y - posicion.y) / alto;
+		return new Point(columna, fila);
 	}
 
 	private Rect getBoundingBox() {
-		return new Rect(posicionX + getAncho() * primeraColumna, posicionY + getAlto() * primeraFila, 
-				posicionX + getAncho() * (ultimaColumna+1), posicionY + getAlto() * (ultimaFila+1));
+		return new Rect(posicion.x + getAnchoAlien() * primeraColumna, posicion.y + getAltoAlien() * primeraFila, 
+				posicion.x + getAnchoAlien() * (ultimaColumna+1), posicion.y + getAltoAlien() * (ultimaFila+1));
 	}
 
 }

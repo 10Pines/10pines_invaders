@@ -11,7 +11,7 @@ public abstract class ObjetoMovible implements Dibujable {
 	private Point posicion = new Point();
 	
 	public void dibujar(Graphics canvas){
-		canvas.drawImage(imagen, posicion.x, posicion.y);
+		canvas.drawImage(imagen, getPosicion());
 	}
 	
 	public Point getPosicion() {

@@ -11,10 +11,10 @@ import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Point;
 import android.graphics.Rect;
 
 import com.jp.framework.Graphics;
-import com.jp.framework.Graphics.ImageFormat;
 import com.jp.framework.Image;
 
 public class AndroidGraphics implements Graphics {
@@ -161,4 +161,14 @@ public class AndroidGraphics implements Graphics {
     public int getHeight() {
         return frameBuffer.getHeight();
     }
+
+	@Override
+	public void drawRect(Rect box, int color) {
+		this.drawRect(box.left, box.top, box.width(), box.height(), color);
+	}
+
+	@Override
+	public void drawImage(Image imagen, Point posicion) {
+		this.drawImage(imagen, posicion.x, posicion.y);
+	}
 }

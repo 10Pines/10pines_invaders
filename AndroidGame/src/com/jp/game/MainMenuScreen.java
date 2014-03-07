@@ -1,13 +1,11 @@
 package com.jp.game;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 
 import com.jp.framework.Game;
@@ -15,6 +13,7 @@ import com.jp.framework.Graphics;
 import com.jp.framework.Graphics.ImageFormat;
 import com.jp.framework.Input.TouchEvent;
 import com.jp.framework.Screen;
+import com.jp.game.exceptions.FinDeJuegoException;
 
 public class MainMenuScreen extends Screen {
 	
@@ -52,13 +51,6 @@ public class MainMenuScreen extends Screen {
 		dibujables = Arrays.asList(nave, flota);
 	}
 
-	private void dibujarTimestamp(Graphics canvas) {
-		Paint paint = new Paint();
-		paint.setTextSize(32);
-		paint.setColor(Color.WHITE);
-		canvas.drawString(Calendar.getInstance().toString(), 10, 10, paint);
-	}
-	
 	public MainMenuScreen(Game game) {
 		super(game);
 	}
@@ -68,12 +60,16 @@ public class MainMenuScreen extends Screen {
 		Graphics canvas = game.getGraphics();
 		canvas.clearScreen(Color.GRAY);
 
-		moverObjetos();
-		dibujarDibujables(canvas);
-			
-		detectarTouches();
+		try	{
+			moverObjetos();
+			dibujarDibujables(canvas);	
+			detectarTouches();
+		} catch(FinDeJuegoException e) {
+			game.setScreen(new LoadingScreen(game));
+		}
 		
 	}
+
 
 	private void detectarTouches() {
 		List<TouchEvent> touchEvents = game.getInput().getTouchEvents();
@@ -110,13 +106,13 @@ public class MainMenuScreen extends Screen {
 	}
 
 	private void moverProyectiles() {
-		for (Proyectil proyectil : proyectiles) {
+		for (Iterator<Proyectil> iterator = proyectiles.iterator(); iterator.hasNext();) {
+			Proyectil proyectil = iterator.next();
 			proyectil.avanzar();
 			if(proyectil.debeDestruir()){
-				proyectiles.remove(proyectil);
+				iterator.remove();
 			}
 		}
-		
 	}
 
 	private void dibujarDibujables(Graphics canvas) {

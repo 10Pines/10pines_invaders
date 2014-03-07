@@ -1,6 +1,8 @@
 package com.jp.framework;
 
 import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.Rect;
 
 public interface Graphics {
     public static enum ImageFormat {
@@ -27,5 +29,9 @@ public interface Graphics {
     public int getHeight();
 
     public void drawARGB(int i, int j, int k, int l);
+
+	public void drawRect(Rect boundingBox, int white);
+
+	public void drawImage(Image imagen, Point posicion);
 
 }
