@@ -10,4 +10,6 @@ public class Assets {
     public static Image nave;
     public static Image alien;
     public static Image proyectil;
+    
+    public static Sound disparoNave;
 }

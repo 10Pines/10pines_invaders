@@ -1,6 +1,7 @@
 package com.jp.game;
 
 import android.graphics.Point;
+import android.media.AudioManager;
 
 import com.jp.framework.Input.TouchEvent;
 
@@ -48,6 +49,7 @@ public class Nave extends ObjetoMovible {
 
 	public Proyectil disparar() {
 		Proyectil proyectil = Proyectil.create(getPosicionPuntaNave());
+		Assets.disparoNave.play();
 		return proyectil;
 	}
 

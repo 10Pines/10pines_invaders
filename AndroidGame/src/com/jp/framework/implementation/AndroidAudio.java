@@ -3,6 +3,7 @@ package com.jp.framework.implementation;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.AudioManager;
@@ -15,10 +16,13 @@ import com.jp.framework.Sound;
 public class AndroidAudio implements Audio {
     AssetManager assets;
     SoundPool soundPool;
+	private AudioManager audioManager;
 
     public AndroidAudio(Activity activity) {
+    	this.assets = activity.getAssets();
+    	this.audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
+    	
         activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        this.assets = activity.getAssets();
         this.soundPool = new SoundPool(20, AudioManager.STREAM_MUSIC, 0);
     }
 
@@ -37,9 +41,16 @@ public class AndroidAudio implements Audio {
         try {
             AssetFileDescriptor assetDescriptor = assets.openFd(filename);
             int soundId = soundPool.load(assetDescriptor, 0);
-            return new AndroidSound(soundPool, soundId);
+            return new AndroidSound(soundPool, soundId, this);
         } catch (IOException e) {
             throw new RuntimeException("Couldn't load sound '" + filename + "'");
         }
     }
+
+	@Override
+	public float getVolume() {
+		return (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+	}
+    
+    
 }

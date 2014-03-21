@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 
+import com.jp.framework.Audio;
 import com.jp.framework.Game;
 import com.jp.framework.Graphics;
 import com.jp.framework.Graphics.ImageFormat;
@@ -50,6 +51,9 @@ public class MainMenuScreen extends Screen {
 		nave = Nave.create(puntoInicialNave, inicioZonaTouchNave, finZonaTouchNave);
 		
 		dibujables = Arrays.asList(nave, flota);
+		
+		Audio gameAudio = game.getAudio();
+		Assets.disparoNave = gameAudio.createSound("disparo_nave.mp3");
 	}
 
 	public MainMenuScreen(Game game) {
@@ -60,7 +64,7 @@ public class MainMenuScreen extends Screen {
 	public void update(float deltaTime) {
 		Graphics canvas = game.getGraphics();
 		canvas.clearScreen(Color.GRAY);
-
+		
 		try	{
 			moverObjetos();
 			dibujarDibujables(canvas);	
