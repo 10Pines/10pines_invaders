@@ -51,7 +51,6 @@ public class Alien extends ObjetoMovible {
 	}
 
 	private void explotar() {
-		// TODAVIA NO HACE NADA
-		
+		Assets.explosionAlien.play();
 	}
 }

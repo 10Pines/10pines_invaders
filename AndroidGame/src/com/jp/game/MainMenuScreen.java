@@ -54,6 +54,7 @@ public class MainMenuScreen extends Screen {
 		
 		Audio gameAudio = game.getAudio();
 		Assets.disparoNave = gameAudio.createSound("disparo_nave.mp3");
+		Assets.explosionAlien = gameAudio.createSound("explosion_alien.mp3");
 	}
 
 	public MainMenuScreen(Game game) {

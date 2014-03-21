@@ -12,4 +12,5 @@ public class Assets {
     public static Image proyectil;
     
     public static Sound disparoNave;
+	public static Sound explosionAlien;
 }
