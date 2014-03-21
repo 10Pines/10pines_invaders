@@ -19,7 +19,7 @@
         <activity
            android:name="com.jp.game.SampleGame"
            android:configChanges="keyboard|keyboardHidden|orientation"
-           android:label="IF RULZ"
+           android:label="10Pines Invaders"
            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

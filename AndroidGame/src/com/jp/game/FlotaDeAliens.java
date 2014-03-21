@@ -1,6 +1,7 @@
 package com.jp.game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.graphics.Color;
@@ -49,16 +50,11 @@ public class FlotaDeAliens implements Dibujable {
 
 	@Override
 	public void dibujar(Graphics canvas) {
-		dibujarBoundingBox(canvas);
 		for (Alien[] columna : aliens) {
 			for (Alien alien : columna) {
 				alien.dibujar(canvas);
 			}
 		}
-	}
-
-	private void dibujarBoundingBox(Graphics canvas) {
-		canvas.drawRect(getBoundingBox(), Color.WHITE);
 	}
 
 	public int getMaxPosicionX() {
@@ -123,10 +119,10 @@ public class FlotaDeAliens implements Dibujable {
 		
 		for (T objetoMovible : objetosMovibles) {
 			//Verifico si esta en mi bounding box
-			Point posicionObjetoMovible = objetoMovible.getPosicion();
-			
-			if(Utils.inBounds(posicionObjetoMovible, getBoundingBox())){
-				Point posicionImpacto = obtenerPosicionDentroDeLaFlota(posicionObjetoMovible);
+			Point puntoDeColision = objetoMovible.getPuntoDeColision();
+			Rect boundingBoxFlota = getBoundingBox();
+			if(boundingBoxFlota.contains(puntoDeColision.x, puntoDeColision.y)){
+				Point posicionImpacto = obtenerPosicionDentroDeLaFlota(puntoDeColision);
 				int columna = posicionImpacto.x;
 				int fila = posicionImpacto.y;
 				if(aliens[columna][fila].estaVivo()){
@@ -215,20 +211,19 @@ public class FlotaDeAliens implements Dibujable {
 		return new Point(columna, fila);
 	}
 
-	private Rect getBoundingBox() {
+	@Override
+	public Rect getBoundingBox() {
 		return new Rect(posicion.x + getAnchoAlien() * primeraColumna, posicion.y + getAltoAlien() * primeraFila, 
 				posicion.x + getAnchoAlien() * (ultimaColumna+1), posicion.y + getAltoAlien() * (ultimaFila+1));
 	}
 
 	public void verificarColisionConNave(Nave nave) throws FinDeJuegoException {
-		if(impactaConNave(nave)){
+		List<Nave> listaNave = Arrays.asList(nave);
+		List<Impacto<Nave>> impactos = detectarImpactosCon(listaNave);
+		if(!impactos.isEmpty()){
 			throw new FinDeJuegoException();
 		}
 		
-	}
-
-	private boolean impactaConNave(Nave nave) {
-		return getBoundingBox().intersect(nave.getBoundingBox());
 	}
 
 }

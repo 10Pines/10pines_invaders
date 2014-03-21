@@ -1,6 +1,7 @@
 package com.jp.game;
 
 import android.graphics.Point;
+import android.graphics.Rect;
 
 import com.jp.framework.Graphics;
 import com.jp.framework.Image;
@@ -55,4 +56,13 @@ public abstract class ObjetoMovible implements Dibujable {
 		this.imagen = imagen;
 	}
 	
+	public Rect getBoundingBox(){
+		Point posicion = getPosicion();
+		return new Rect(posicion.x, posicion.y, posicion.x + getAncho(), posicion.y + getAlto());
+	}
+	
+	public Point getPuntoDeColision(){
+		Point centroObjetoMovible = new Point(posicion.x + getAncho()/2, posicion.y + getAlto()/2);
+		return centroObjetoMovible;
+	}
 }

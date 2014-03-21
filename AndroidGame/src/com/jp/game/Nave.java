@@ -1,7 +1,6 @@
 package com.jp.game;
 
 import android.graphics.Point;
-import android.graphics.Rect;
 
 import com.jp.framework.Input.TouchEvent;
 
@@ -56,10 +55,10 @@ public class Nave extends ObjetoMovible {
 		Point posicion = new Point(this.getPosicion().x + this.getAncho()/2, this.getPosicion().y);
 		return posicion;
 	}
-
-	public Rect getBoundingBox() {
-		Point posicion = getPosicion();
-		return new Rect(posicion.x, posicion.y, posicion.x + getAncho(), posicion.y + getAlto());
+	
+	@Override
+	public Point getPuntoDeColision(){
+		return this.getPosicionPuntaNave();
 	}
-
+	
 }
